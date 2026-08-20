@@ -4,11 +4,13 @@ import com.bookworm.api.model.AuthResponse;
 import com.bookworm.api.model.LoginRequest;
 import com.bookworm.api.model.RefreshRequest;
 import com.bookworm.api.model.RegisterRequest;
+import com.bookworm.cart.CartService;
 import com.bookworm.common.ApiException;
 import com.bookworm.member.UserMapper;
 import com.bookworm.member.entity.UserEntity;
 import com.bookworm.member.entity.UserRole;
 import com.bookworm.member.repo.UserRepository;
+import com.bookworm.wishlist.WishlistService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +25,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final UserMapper userMapper;
+    private final CartService cartService;
+    private final WishlistService wishlistService;
 
     @Transactional
     public AuthResponse register(RegisterRequest req) {
@@ -41,6 +45,11 @@ public class AuthService {
                 .giftPoints(0)
                 .build();
         user = userRepository.save(user);
+
+        // Provision empty cart + wishlist rows so later reads never have to lazily create them.
+        cartService.getOrCreateCart(user.getId());
+        wishlistService.getOrCreateWishlist(user.getId());
+
         return issueTokens(user);
     }
 
