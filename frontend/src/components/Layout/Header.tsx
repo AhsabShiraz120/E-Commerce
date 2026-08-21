@@ -1,10 +1,12 @@
 import { Link, NavLink } from 'react-router-dom';
-import { BookOpen, Heart, ShoppingCart, User } from 'lucide-react';
+import { BookOpen, Heart, LogOut, ShoppingCart, User } from 'lucide-react';
 import clsx from 'clsx';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { signedOut } from '@/store/slices/authSlice';
 
 export function Header() {
   const user = useAppSelector(s => s.auth.user);
+  const dispatch = useAppDispatch();
 
   return (
     <header className="sticky top-0 z-10 bg-surface/95 backdrop-blur border-b border-border">
@@ -28,11 +30,19 @@ export function Header() {
             <ShoppingCart className="w-5 h-5" />
           </Link>
           {user ? (
-            <Link to="/orders" className="flex items-center gap-2 text-sm">
-              <span className="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-semibold">
+            <div className="flex items-center gap-2">
+              <Link to="/orders" className="w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center text-xs font-semibold" aria-label="Account">
                 {(user.firstName?.[0] ?? user.email[0]).toUpperCase()}
-              </span>
-            </Link>
+              </Link>
+              <button
+                onClick={() => dispatch(signedOut())}
+                className="text-muted hover:text-body"
+                aria-label="Sign out"
+                title="Sign out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           ) : (
             <Link to="/login" className="btn-ghost !py-1.5 !px-3 text-sm">
               <User className="w-4 h-4" /> Sign in
