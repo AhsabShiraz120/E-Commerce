@@ -17,6 +17,7 @@ import com.bookworm.order.entity.OrderStatus;
 import com.bookworm.order.entity.PaymentEntity;
 import com.bookworm.order.repo.OrderRepository;
 import com.bookworm.order.repo.PaymentRepository;
+import com.bookworm.payment.MockPaymentGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +31,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +46,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final CartService cartService;
     private final OrderMapper orderMapper;
+    private final MockPaymentGateway paymentGateway;
 
     // ------------------------------------------------------ CHECKOUT
 
@@ -195,12 +196,13 @@ public class OrderService {
         return new BuyAgainResult().cart(cart).skippedBookIds(skipped);
     }
 
-    // ------------------------------------------------------ PAY (v1 stub)
+    // ------------------------------------------------------ PAY
 
     /**
-     * v1 stub. Branch 7 replaces this with the MockPaymentGateway which respects
-     * the ends-in-0000 decline. The interface (endpoint + response shape) stays
-     * exactly the same.
+     * Routes through {@link MockPaymentGateway}. Cards ending in {@code 0000}
+     * (or UPI IDs starting with {@code fail@}) are declined; every other input
+     * succeeds. Both success and decline paths persist a {@link PaymentEntity}
+     * row so the order has an audit trail.
      */
     @Transactional
     public Payment pay(Long userId, Long orderId, PaymentRequest req) {
@@ -210,15 +212,24 @@ public class OrderService {
             throw new ApiException(HttpStatus.CONFLICT, ApiErrorCode.ILLEGAL_STATUS_TRANSITION,
                     "Order in status " + o.getStatus() + " cannot be paid");
         }
+
         String method = req.getMethod() == null ? "CREDIT" : req.getMethod().getValue();
+        MockPaymentGateway.ChargeResult result = paymentGateway.charge(req, o.getTotalPaise());
+
         PaymentEntity payment = PaymentEntity.builder()
                 .orderId(o.getId())
                 .method(method)
-                .status("SUCCESS")
-                .transactionRef("STUB-" + UUID.randomUUID())
+                .status(result.success() ? "SUCCESS" : "DECLINED")
+                .transactionRef(result.transactionRef())
                 .amountPaise(o.getTotalPaise())
                 .build();
         paymentRepository.save(payment);
+
+        if (!result.success()) {
+            throw new ApiException(HttpStatus.PAYMENT_REQUIRED, ApiErrorCode.PAYMENT_DECLINED,
+                    result.declineReason());
+        }
+
         o.setStatus(OrderStatus.PAID);
 
         // Track copies sold (used by bestseller rail + recommender)
