@@ -3,10 +3,13 @@ import { BookOpen, Heart, LogOut, ShoppingCart, User } from 'lucide-react';
 import clsx from 'clsx';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { signedOut } from '@/store/slices/authSlice';
+import { useGetCartQuery } from '@/store/api/cartApi';
 
 export function Header() {
   const user = useAppSelector(s => s.auth.user);
   const dispatch = useAppDispatch();
+  const { data: cart } = useGetCartQuery(undefined, { skip: !user });
+  const cartCount = cart?.items.reduce((n, i) => n + i.quantity, 0) ?? 0;
 
   return (
     <header className="sticky top-0 z-10 bg-surface/95 backdrop-blur border-b border-border">
@@ -28,6 +31,11 @@ export function Header() {
           </Link>
           <Link to="/cart" className="relative text-muted hover:text-body" aria-label="Cart">
             <ShoppingCart className="w-5 h-5" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-accent text-white text-[10px] font-semibold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center">
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            )}
           </Link>
           {user ? (
             <div className="flex items-center gap-2">
