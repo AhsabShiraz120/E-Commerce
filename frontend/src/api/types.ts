@@ -10,9 +10,10 @@ export type ApiError            = components['schemas']['ApiError'];
 export type ApiErrorCode        = components['schemas']['ApiErrorCode'];
 export type PageMeta            = components['schemas']['PageMeta'];
 
-export type User                = components['schemas']['User'];
-export type Address             = components['schemas']['Address'];
-export type AddressRequest      = components['schemas']['AddressRequest'];
+export type User                  = components['schemas']['User'];
+export type UpdateProfileRequest  = components['schemas']['UpdateProfileRequest'];
+export type Address               = components['schemas']['Address'];
+export type AddressRequest        = components['schemas']['AddressRequest'];
 
 export type Category            = components['schemas']['Category'];
 export type Brand               = components['schemas']['Brand'];
