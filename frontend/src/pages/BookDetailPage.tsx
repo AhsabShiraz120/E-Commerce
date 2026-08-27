@@ -137,7 +137,7 @@ export function BookDetailPage() {
       </div>
 
       {/* Related Reads sidebar */}
-      <aside>
+      <aside className="min-w-0">
         <BookRail
           title="Related Reads"
           books={related}

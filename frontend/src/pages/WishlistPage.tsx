@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Trash2, ShoppingCart } from 'lucide-react';
+import { BookCard } from '@/components/BookCard';
 import { useGetWishlistQuery, useRemoveWishlistItemMutation } from '@/store/api/wishlistApi';
 import { useAddCartItemMutation } from '@/store/api/cartApi';
 import { useAppSelector } from '@/store/hooks';
-import { formatPaise } from '@/lib/format';
 
 export function WishlistPage() {
   const isSignedIn = useAppSelector((s) => Boolean(s.auth.accessToken));
@@ -47,19 +47,7 @@ export function WishlistPage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {items.map((item) => (
           <div key={item.id} className="space-y-2">
-            <Link to={`/books/${item.book.id}`} className="block group">
-              <div className="aspect-[3/4] rounded overflow-hidden bg-surface2 relative">
-                <div
-                  className="absolute inset-0 flex items-end p-3 text-white text-sm font-medium"
-                  style={{ background: gradient(item.book.title) }}
-                >
-                  <span className="line-clamp-4 drop-shadow">{item.book.title}</span>
-                </div>
-              </div>
-              <p className="text-sm font-medium line-clamp-2 mt-2 group-hover:text-accent">{item.book.title}</p>
-              <p className="text-xs text-muted">{item.book.authorName}</p>
-              <p className="text-sm font-semibold tabular-nums">{formatPaise(item.book.pricePaise)}</p>
-            </Link>
+            <BookCard book={item.book} className="w-auto" />
             <div className="flex gap-2">
               <button
                 className="btn-primary flex-1 !py-1.5 text-xs"
@@ -83,9 +71,3 @@ export function WishlistPage() {
   );
 }
 
-function gradient(s: string): string {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  const hue = Math.abs(h) % 360;
-  return `linear-gradient(135deg, hsl(${hue}, 55%, 45%) 0%, hsl(${(hue + 40) % 360}, 55%, 25%) 100%)`;
-}
