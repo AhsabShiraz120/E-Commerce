@@ -16,7 +16,7 @@ export function BookCard({ book, className = '' }: Props) {
   return (
     <Link
       to={`/books/${book.id}`}
-      className={`group w-40 sm:w-44 shrink-0 ${className}`}
+      className={`group block ${className}`}
     >
       <CoverArt title={book.title} coverUrl={book.coverUrl} />
       <div className="mt-2 space-y-0.5">

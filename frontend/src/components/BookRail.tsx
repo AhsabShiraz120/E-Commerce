@@ -30,10 +30,10 @@ export function BookRail({ title, books, loading, emptyMessage }: Props) {
       ) : !books || books.length === 0 ? (
         <p className="text-muted text-sm py-4">{emptyMessage ?? 'Nothing here yet.'}</p>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x">
+        <div className="flex gap-4 overflow-x-auto pb-2 snap-x">
           {books.map((b) => (
             <div key={b.id} className="snap-start">
-              <BookCard book={b} />
+              <BookCard book={b} className="w-40 sm:w-44 shrink-0" />
             </div>
           ))}
         </div>

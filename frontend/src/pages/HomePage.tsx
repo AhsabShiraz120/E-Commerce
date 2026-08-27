@@ -16,7 +16,7 @@ export function HomePage() {
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <CategorySidebar className="hidden lg:block" />
-      <div className="flex-1 space-y-8">
+      <div className="flex-1 min-w-0 space-y-8">
         <Hero />
 
         {isSignedIn && (
